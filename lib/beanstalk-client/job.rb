@@ -83,10 +83,10 @@ class Beanstalk::Job
   # Time left (in seconds) that beanstalk has to process the job. When this time expires, beanstalkd automatically reinserts the job in the queue.  See the ttr parameter for Beanstalk::Pool#put
   def time_left() stats['time-left'] end
   def age() stats['age'] end
-  def state() stats['state'] end
-  def delay() stats['delay'] end
-  def pri() stats['pri'] end
-  def ttr() stats['ttr'] end
+  def state() (@stats ||=stats)['state'] end
+  def delay() (@stats ||=stats)['delay'] end
+  def pri() (@stats ||=stats)['pri'] end
+  def ttr() (@stats ||=stats)['ttr'] end
 
   def server()
     @conn.addr
