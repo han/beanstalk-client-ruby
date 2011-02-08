@@ -55,7 +55,11 @@ module Beanstalk
       ttr = ttr.to_i
       body = "#{body}" # Make sure that body.bytesize gives a useful number
       interact("put #{pri} #{delay} #{ttr} #{body.bytesize}\r\n#{body}\r\n",
-               %w(INSERTED BURIED))[0].to_i
+              %w(INSERTED BURIED))[0].to_i
+    rescue BadFormatError 
+      # beanstalk returns before processing any body lines. Clear up responses to those
+      get_resp while socket_data?
+      raise
     end
 
     def yput(obj, pri=65536, delay=0, ttr=120)
@@ -188,6 +192,11 @@ module Beanstalk
       check_resp(*rfmt)
     ensure
       @mutex.unlock
+    end
+    
+    def socket_data?
+       r,w,e = IO.select([@socket],nil,nil,0.5)
+       return r != nil
     end
 
     def get_resp()
